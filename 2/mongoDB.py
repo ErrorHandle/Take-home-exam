@@ -7,7 +7,9 @@ import models.contentHouse as contentHouse
 from marshmallow import Schema, fields, ValidationError
 import json
 
+#序列化
 HouseSchema = contentHouse.HouseSchema()
+
 class Connection(object):
     conn = None
 
@@ -26,6 +28,9 @@ def store_houses():
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
+#
+#尋找非屋主自行刊登物件
+#
 def houses_list():
     try:
         houses  = store_houses().find({'owner': {"$nin":['屋主']}})
@@ -35,7 +40,9 @@ def houses_list():
     except:
         result.write_log("critical", "Failed connect to mongoDB, method: houses_list")
         return None
-
+#
+#透過電話尋找租屋物件
+#
 def find_houses_by_phone_num(phone_num):
     try:
         house = store_houses().find_one({'phone_num': phone_num})
@@ -45,7 +52,9 @@ def find_houses_by_phone_num(phone_num):
     except:
         result.write_log("critical", "Failed connect to mongoDB, method: find_houses_by_phone_num")
         return None
-
+#
+#透過地區和承租性別尋找租屋物件
+#
 def find_houses_by_gender_region(gender, region):
     try:
         house = store_houses().find({'addr': {'$regex': '^{}.*'.format(region)}, 'gender': gender}, {'name': 1, 'phone_num': 1, 'addr':1, 'gender':1})
@@ -55,7 +64,9 @@ def find_houses_by_gender_region(gender, region):
     except:
         result.write_log("critical", "Failed connect to mongoDB, method: find_houses_by_phone_num")
         return None
-
+#
+#透過名字性別尋找符合房東之租屋物件
+#
 def find_houses_by_owner_region(name, region):
     try:
         house = store_houses().find({'name': name, 'addr': {'$regex': '^{}.*'.format(region)}}, {'name': 1, 'phone_num': 1, 'addr':1})
