@@ -23,13 +23,17 @@ def get_house_url_id(json_data):
         name.append(nick_name[1])
 
     return house_id_list, owner, name
-
+#
+# 連結mongoDB
+#
 def connect_mongo(date):
     client = MongoClient(util.MONGO_HOST, util.MONGO_PORT)
     db = client[util.MONGO_DB_ACCOUNT]
     collection = db[util.MONGO_COLLECTION_ACCOUNT]
     return collection
-
+#
+#爬取當前頁面30筆租屋物件
+#
 def get_house_info(house_id_list, owner_list, name_list, collection):
     for i in range(len(house_id_list)):
         #request url
@@ -69,6 +73,7 @@ def get_house_info(house_id_list, owner_list, name_list, collection):
             else:
                 house_type, house_status = 0, 0
         print(name_list[i], phone_num, addr, house_type, house_status, gender,owner_list[i])
+        #儲存格式
         info = {
             'name': name_list[i],
             'owner': owner_list[i],
@@ -78,11 +83,15 @@ def get_house_info(house_id_list, owner_list, name_list, collection):
             'house_status': house_status,
             'gender': gender
         }
+        #新增至mongoDB
         collection.insert_one(info)
         time.sleep(4)
-
+#
+#爬取總頁數、物件ID
+#
 def crawl_591():
     collection = connect_mongo('0320')
+    #total_paege 總頁數
     total_pages = 12816 // 30
     # for pages in range(total_pages):
     for pages in range(total_pages):
@@ -95,6 +104,7 @@ def crawl_591():
 
         json_obj = json.loads(res.text)
         house_id_list, owner_list, name_list = get_house_url_id(json_obj)
+        #爬取當前頁面30筆租屋物件
         get_house_info(house_id_list, owner_list, name_list, collection)
     return 'done!'
 
